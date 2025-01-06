@@ -1,5 +1,4 @@
 from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import StringProperty
 from pdf2image import convert_from_path
 from printer_logic import process_and_print  # Импорт вашей логики печати
@@ -7,48 +6,39 @@ from android.permissions import request_permissions, Permission, check_permissio
 from android.storage import primary_external_storage_path
 from jnius import autoclass
 from plyer import filechooser
+from kivy.properties import ListProperty
+from kivy.uix.widget import Widget
+
 
 import os
 
-class PrinterAppWidget(BoxLayout):
+class PrinterAppWidget(Widget):
     status = StringProperty("Выберите параметры и нажмите 'Печать'.")
     pdf_path = StringProperty("")
+
+    def __init__(self, **kwargs):
+        super().__init__(kwargs)
+        selection = ListProperty([])
 
     def open_file_chooser(self):
         """Open a file chooser to select a PDF."""
         if not check_permission(Permission.READ_EXTERNAL_STORAGE):
-            request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
+            request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE, Permission.MANAGE_EXTERNAL_STORAGE])
 
         # Use Plyer's filechooser to open a file dialog
         try:
-            file_path = filechooser.open_file()
-            if file_path:
-                self.pdf_path = file_path[0]
+            filechooser.open_file(on_selection=self.handle_selection)
+            if  self.selection:
+                self.pdf_path =  self.selection[0]
                 self.status = f"Выбран файл: {self.pdf_path}"
             else:
                 self.status = "Файл не выбран."
         except Exception as e:
                 self.status = f"Ошибка при выборе файла: {e}"
 
-    def get_real_path_from_uri(self, uri):
-        DocumentsContract = autoclass('android.provider.DocumentsContract')
-        context = autoclass('android.content.Context')
-        content_resolver = context.getContentResolver()
+    def handle_selection(self, selection):
 
-        doc_id = DocumentsContract.getDocumentId(uri)
-        split = doc_id.split(':')
-        file_id = split[1]
-
-        # Build the URI for the document
-        base_uri = DocumentsContract.buildDocumentUriUsingTree(uri, file_id)
-        cursor = content_resolver.query(base_uri, None, None, None, None)
-        if cursor and cursor.moveToFirst():
-            column_index = cursor.getColumnIndex("_data")
-            path = cursor.getString(column_index)
-            cursor.close()
-            return path
-
-        return None
+            self.selection = selection
 
     def print_pdf(self):
         """Convert PDF to images and print them."""
