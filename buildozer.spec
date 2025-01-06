@@ -93,16 +93,16 @@ fullscreen = 0
 #icon.adaptive_background.filename = %(source.dir)s/data/icon_bg.png
 
 # (list) Permissions
-android.permissions = WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE, INTERNET, READ_MEDIA_IMAGES,READ_MEDIA_VIDEO,WRITE_EXTERNAL_STORAGE,BLUETOOTH,BLUETOOTH_SCAN, BLUETOOTH_CONNECT,ACCESS_FINE_LOCATION,MANAGE_EXTERNAL_STORAGE
+android.permissions = WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE, INTERNET, READ_MEDIA_IMAGES,READ_MEDIA_VIDEO,WRITE_EXTERNAL_STORAGE,BLUETOOTH,BLUETOOTH_SCAN, BLUETOOTH_CONNECT,ACCESS_FINE_LOCATION
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
 
 # (int) Target Android API, should be as high as possible.
-android.api = 30
+android.api = 31
 
 # (int) Minimum API your APK / AAB will support.
-android.minapi = 24
+android.minapi = 30
 
 # (int) Android SDK version to use
 #android.sdk = 20
@@ -111,7 +111,7 @@ android.minapi = 24
 #android.ndk = 19b
 
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
-android.ndk_api = 24
+android.ndk_api = 30
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 #android.private_storage = True

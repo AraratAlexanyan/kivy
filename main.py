@@ -14,31 +14,40 @@ class PrinterAppWidget(BoxLayout):
     status = StringProperty("Выберите параметры и нажмите 'Печать'.")
     pdf_path = StringProperty("")  # Путь к PDF файлу
 
-    def open_file_chooser(self):
-        """Открыть окно выбора файла PDF."""
-        if not check_permission(Permission.READ_EXTERNAL_STORAGE ):
+    def open_file_chooser(self, allowed_extensions=None):
+        """Открыть окно выбора файла без фильтров."""
+        # Проверка и запрос разрешений
+        if not check_permission(Permission.READ_EXTERNAL_STORAGE):
             request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
         if not check_permission(Permission.MANAGE_EXTERNAL_STORAGE):
             request_permissions([Permission.MANAGE_EXTERNAL_STORAGE])
 
-        storage_path = primary_external_storage_path()  # Default path
-        if not isdir(storage_path):  # Fallback to /sdcard/Download if path is invalid
+        # Установка пути к хранилищу
+        storage_path = primary_external_storage_path()  # Путь к внешнему хранилищу
+        if not isdir(storage_path):  # Если путь недоступен, используем стандартный Download
             storage_path = '/sdcard/Download'
 
-        content = FileChooserListView(path=storage_path)
-        content.filters = [lambda folder, filename: filename.endswith('.pdf')]  # Filter only PDF files
+        # Создание FileChooser без фильтров
+        content = FileChooserListView(
+            path=storage_path,
+            show_hidden=False,
+            filters=allowed_extensions
+            # Скрыть скрытые файлы
+        )
         popup = Popup(
-            title="Выберите PDF файл",
+            title="Выберите файл",
             content=content,
             size_hint=(0.9, 0.9),
         )
 
         def on_file_selected(instance, selection, *args):
+            """Обработчик выбора файла."""
             if selection:
-                self.pdf_path = selection[0]  # Set the PDF file path
-                self.status = f"Выбран PDF: {self.pdf_path}"
+                self.file_path = selection[0]  # Устанавливаем путь к выбранному файлу
+                self.status = f"Выбран файл: {self.file_path}"
             popup.dismiss()
 
+        # Привязка события на выбор файла
         content.bind(on_submit=on_file_selected)
         popup.open()
 

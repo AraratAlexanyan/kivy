@@ -64,7 +64,7 @@
         text: "Выбрать PDF"
         size_hint_y: None
         height: 50
-        on_press: root.open_file_chooser()
+        on_press: root.open_file_chooser(allowed_extensions=['*.pdf', '*.png'])
 
     # Логирование
     BoxLayout:
