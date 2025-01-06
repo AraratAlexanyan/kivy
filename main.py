@@ -6,7 +6,7 @@ from kivy.uix.filechooser import FileChooserListView
 from kivy.properties import StringProperty
 from pdf2image import convert_from_path
 from printer_logic import process_and_print  # Импорт вашей логики печати
-from android.permissions import request_permissions, Permission
+from android.permissions import request_permissions, Permission, check_permission
 from android.storage import primary_external_storage_path
 from os.path import isdir
 
