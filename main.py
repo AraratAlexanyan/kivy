@@ -10,35 +10,29 @@ from android.storage import primary_external_storage_path
 from os.path import isdir
 from android import activity
 from jnius import autoclass
+from plyer import filechooser
+
 import os
 
 class PrinterAppWidget(BoxLayout):
     status = StringProperty("Выберите параметры и нажмите 'Печать'.")
     pdf_path = StringProperty("")  # Path to the PDF file
 
-    def open_file_chooser(self):
-        """Open Android's native file chooser for selecting PDF files."""
+   def open_file_chooser(self):
+        """Open a file chooser to select a PDF."""
         if not check_permission(Permission.READ_EXTERNAL_STORAGE):
             request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
 
-        # Prepare the native file picker intent
-        Intent = autoclass('android.content.Intent')
-        intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.setType("application/pdf")
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-
-        def on_activity_result(request_code, result_code, data):
-            """Handle the result of the file picker activity."""
-            if result_code == -1:  # RESULT_OK
-                uri = data.getData()
-                self.pdf_path = self.get_real_path_from_uri(uri)
-                if self.pdf_path:
-                    self.status = f"Выбран файл: {self.pdf_path}"
-                else:
-                    self.status = "Не удалось получить путь к файлу."
-
-        activity.bind(on_activity_result=on_activity_result)
-        activity.startActivityForResult(intent, 1)
+        # Use Plyer's filechooser to open a file dialog
+        try:
+            file_path = filechooser.open_file()
+            if file_path:
+                self.pdf_path = file_path[0]
+                self.status = f"Выбран файл: {self.pdf_path}"
+            else:
+                self.status = "Файл не выбран."
+        except Exception as e:
+            self.status = f"Ошибка при выборе файла: {e}"
 
     def get_real_path_from_uri(self, uri):
         """Get the real file path from a URI."""
