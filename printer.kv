@@ -1,0 +1,87 @@
+<PrinterAppWidget>:
+    orientation: "vertical"
+    padding: 20
+    spacing: 10
+
+    # Выбор модели принтера
+    BoxLayout:
+        spacing: 10
+        Label:
+            text: "Модель:"
+        Spinner:
+            id: model_spinner
+            text: "b1"
+            values: ["b1", "b18", "b21", "d11", "d110"]
+
+    # Выбор типа соединения
+    BoxLayout:
+        spacing: 10
+        Label:
+            text: "Соединение:"
+        Spinner:
+            id: conn_spinner
+            text: "usb"
+            values: ["usb", "bluetooth"]
+
+    # Ввод MAC-адреса или пути
+    BoxLayout:
+        spacing: 10
+        Label:
+            text: "Адрес/Порт:"
+        TextInput:
+            id: addr_input
+            multiline: False
+
+    # Выбор плотности
+    BoxLayout:
+        spacing: 10
+        Label:
+            text: "Плотность:"
+        Spinner:
+            id: density_spinner
+            text: "5"
+            values: ["1", "2", "3", "4", "5"]
+
+    # Выбор поворота
+    BoxLayout:
+        spacing: 10
+        Label:
+            text: "Поворот:"
+        Spinner:
+            id: rotate_spinner
+            text: "0"
+            values: ["0", "90", "180", "270"]
+
+    # Путь к PDF
+    BoxLayout:
+        spacing: 10
+        Label:
+            text: "Выбранный PDF файл:"
+        Label:
+            text: root.pdf_path if root.pdf_path else "Не выбрано"
+
+    Button:
+        text: "Выбрать PDF"
+        size_hint_y: None
+        height: 50
+        on_press: root.open_file_chooser()
+
+    # Логирование
+    BoxLayout:
+        spacing: 10
+        Label:
+            text: "Включить логирование:"
+        CheckBox:
+            id: verbose_checkbox
+
+    # Кнопка печати
+    Button:
+        text: "Печать"
+        size_hint_y: None
+        height: 50
+        on_press: root.print_pdf()
+
+    # Статус
+    Label:
+        id: status_label
+        text: root.status
