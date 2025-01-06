@@ -6,6 +6,9 @@ from kivy.uix.filechooser import FileChooserListView
 from kivy.properties import StringProperty
 from pdf2image import convert_from_path
 from printer_logic import process_and_print  # Импорт вашей логики печати
+from android.permissions import request_permissions, Permission
+from android.storage import primary_external_storage_path
+
 
 class PrinterAppWidget(BoxLayout):
     status = StringProperty("Выберите параметры и нажмите 'Печать'.")
@@ -13,18 +16,25 @@ class PrinterAppWidget(BoxLayout):
 
     def open_file_chooser(self):
         """Открыть окно выбора файла PDF."""
-        content = FileChooserListView()
-        content.filters = ['*.pdf']  # Фильтрация только по PDF
+        # Request Android permissions
+        request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
+
+        # Use Android's primary external storage directory
+        storage_path = primary_external_storage_path()
+
+        # Configure FileChooser
+        content = FileChooserListView(path=storage_path)
+        content.filters = ['*.pdf']  # Filter only PDF files
         popup = Popup(
             title="Выберите PDF файл",
             content=content,
             size_hint=(0.9, 0.9),
         )
 
-        # Функция срабатывает при выборе файла
+        # Function triggered on file selection
         def on_file_selected(instance, selection, *args):
             if selection:
-                self.pdf_path = selection[0]  # Устанавливаем путь к PDF файлу
+                self.pdf_path = selection[0]  # Set the PDF file path
                 self.status = f"Выбран PDF: {self.pdf_path}"
             popup.dismiss()
 
@@ -36,31 +46,30 @@ class PrinterAppWidget(BoxLayout):
             if not self.pdf_path:
                 raise ValueError("Выберите PDF для печати!")
 
-            # Преобразуем PDF в изображения
+            # Convert PDF to images
             images = convert_from_path(self.pdf_path)
 
-            # Убедимся, что директория 'output' существует
+            # Ensure 'output' directory exists
             output_dir = "output"
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
 
-            # Сбор данных из интерфейса
+            # Collect data from the interface
             model = self.ids.model_spinner.text
             conn = self.ids.conn_spinner.text
             addr = self.ids.addr_input.text
             density = int(self.ids.density_spinner.text)
             rotate = self.ids.rotate_spinner.text
             verbose = self.ids.verbose_checkbox.active
-            image_paths= []
+            image_paths = []
 
-
+            # Save PDF pages as images
             for idx, image in enumerate(images):
-
                 image_path = os.path.join(output_dir, f"page_{idx + 1}.png")
                 image_paths.append(image_path)
                 image.save(image_path, "PNG")
 
-
+            # Process and print each image
             for p in image_paths:
                 process_and_print(model, conn, addr, density, rotate, p, verbose)
 
@@ -69,9 +78,11 @@ class PrinterAppWidget(BoxLayout):
         except Exception as e:
             self.status = f"Ошибка: {e}"
 
+
 class PrinterApp(App):
     def build(self):
         return PrinterAppWidget()
+
 
 if __name__ == "__main__":
     PrinterApp().run()
