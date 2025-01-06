@@ -1,14 +1,10 @@
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.popup import Popup
-from kivy.uix.filechooser import FileChooserListView
 from kivy.properties import StringProperty
 from pdf2image import convert_from_path
 from printer_logic import process_and_print  # Импорт вашей логики печати
 from android.permissions import request_permissions, Permission, check_permission
 from android.storage import primary_external_storage_path
-from os.path import isdir
-from android import activity
 from jnius import autoclass
 from plyer import filechooser
 
@@ -16,9 +12,9 @@ import os
 
 class PrinterAppWidget(BoxLayout):
     status = StringProperty("Выберите параметры и нажмите 'Печать'.")
-    pdf_path = StringProperty("")  # Path to the PDF file
+    pdf_path = StringProperty("")
 
-   def open_file_chooser(self):
+    def open_file_chooser(self):
         """Open a file chooser to select a PDF."""
         if not check_permission(Permission.READ_EXTERNAL_STORAGE):
             request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
@@ -32,10 +28,9 @@ class PrinterAppWidget(BoxLayout):
             else:
                 self.status = "Файл не выбран."
         except Exception as e:
-            self.status = f"Ошибка при выборе файла: {e}"
+                self.status = f"Ошибка при выборе файла: {e}"
 
     def get_real_path_from_uri(self, uri):
-        """Get the real file path from a URI."""
         DocumentsContract = autoclass('android.provider.DocumentsContract')
         context = autoclass('android.content.Context')
         content_resolver = context.getContentResolver()
@@ -52,6 +47,7 @@ class PrinterAppWidget(BoxLayout):
             path = cursor.getString(column_index)
             cursor.close()
             return path
+
         return None
 
     def print_pdf(self):
