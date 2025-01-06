@@ -8,7 +8,7 @@ from pdf2image import convert_from_path
 from printer_logic import process_and_print  # Импорт вашей логики печати
 from android.permissions import request_permissions, Permission
 from android.storage import primary_external_storage_path
-
+from os.path import isdir
 
 class PrinterAppWidget(BoxLayout):
     status = StringProperty("Выберите параметры и нажмите 'Печать'.")
@@ -16,22 +16,23 @@ class PrinterAppWidget(BoxLayout):
 
     def open_file_chooser(self):
         """Открыть окно выбора файла PDF."""
-        # Request Android permissions
-        request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
+        if not check_permission(Permission.READ_EXTERNAL_STORAGE ):
+            request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
+        if not check_permission(Permission.MANAGE_EXTERNAL_STORAGE):
+            request_permissions([Permission.MANAGE_EXTERNAL_STORAGE])
 
-        # Use Android's primary external storage directory
-        storage_path = primary_external_storage_path()
+        storage_path = primary_external_storage_path()  # Default path
+        if not isdir(storage_path):  # Fallback to /sdcard/Download if path is invalid
+            storage_path = '/sdcard/Download'
 
-        # Configure FileChooser
         content = FileChooserListView(path=storage_path)
-        content.filters = ['*.pdf']  # Filter only PDF files
+        content.filters = [lambda folder, filename: filename.endswith('.pdf')]  # Filter only PDF files
         popup = Popup(
             title="Выберите PDF файл",
             content=content,
             size_hint=(0.9, 0.9),
         )
 
-        # Function triggered on file selection
         def on_file_selected(instance, selection, *args):
             if selection:
                 self.pdf_path = selection[0]  # Set the PDF file path
