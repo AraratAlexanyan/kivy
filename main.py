@@ -17,8 +17,8 @@ class PrinterAppWidget(Widget):
     pdf_path = StringProperty("")
 
     def __init__(self, **kwargs):
-        super().__init__()
-        selection = ListProperty([])
+        super().__init__(**kwargs)
+        self.selection = ListProperty([])
 
     def open_file_chooser(self):
         """Open a file chooser to select a PDF."""
