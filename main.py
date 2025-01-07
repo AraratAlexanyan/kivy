@@ -1,5 +1,6 @@
 from kivy.app import App
 from kivy.properties import StringProperty
+from kivy.uix.boxlayout import BoxLayout
 from pdf2image import convert_from_path
 from printer_logic import process_and_print  # Импорт вашей логики печати
 from android.permissions import request_permissions, Permission, check_permission
@@ -7,12 +8,11 @@ from android.storage import primary_external_storage_path
 from jnius import autoclass
 from plyer import filechooser
 from kivy.properties import ListProperty
-from kivy.uix.widget import Widget
 
 
 import os
 
-class PrinterAppWidget(Widget):
+class PrinterAppWidget(BoxLayout):
     status = StringProperty("Выберите параметры и нажмите 'Печать'.")
     pdf_path = StringProperty("")
 
